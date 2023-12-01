@@ -1,0 +1,187 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Kite Project</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-11-30"><meta name="DC.source" content="kite_model.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Kite Project</h1><!--introduction--><p>Thermal Fluid Systems FA23</p><p>By Joe Leedy</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Kite Shape Parameters</a></li><li><a href="#3">Air Properties</a></li><li><a href="#4">Solving for Center of Pressure and Center of Gravity</a></li><li><a href="#5">dont forget about fsolve()</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>
+clear <span class="string">all</span>
+clc
+</pre><h2 id="2">Kite Shape Parameters</h2><p>Kite is a simple diamond design with a cross beam at the COP (1/4 the total length). This allows for more simplified complications. The following section defines the length, width, and frontal area of my kite.</p><pre class="codeinput">W = 29; <span class="comment">%length of beam (in)</span>
+L = 29;
+
+W = W * 0.0254; <span class="comment">%convert to meters</span>
+L = L * 0.0254;
+
+A = (W*L)/2; <span class="comment">% m^2 (surface area)</span>
+</pre><h2 id="3">Air Properties</h2><pre class="codeinput">t_air = ((40-32)/1.8); <span class="comment">% c</span>
+hum_air = 40; <span class="comment">% relative humidity %</span>
+
+[rho_air,mu_air] = AirProperties(t_air,[],hum_air); <span class="comment">%credit to @sjfitz on github for this funciton</span>
+mu_air = mu_air * 0.1019; <span class="comment">%conversion factor to kg/m-s</span>
+</pre><h2 id="4">Solving for Center of Pressure and Center of Gravity</h2><pre class="codeinput">kiteshape = [0 W/2 0;0 L/4 L]; <span class="comment">%points to plot the kite shape</span>
+cline = [0 0;0 L];
+
+<span class="comment">%plot the kite and a dashed centerline</span>
+plot(kiteshape(2,:),kiteshape(1,:),<span class="string">'Color'</span>,<span class="string">'blue'</span>); axis <span class="string">equal</span>
+hold <span class="string">on</span>; plot(cline(2,:),cline(1,:), <span class="string">'--'</span>, <span class="string">'Color'</span>,<span class="string">'black'</span>);
+
+<span class="comment">% code for generating a peicewise function of the kite</span>
+m1 = (W/2)/(kiteshape(2,2)-kiteshape(2,1)); <span class="comment">%eq. 1</span>
+b1 = 0;
+m2 = -(W/2)/(kiteshape(2,3)-kiteshape(2,2)); <span class="comment">%eq. 2</span>
+b2 = -m2*L;
+
+<span class="comment">%code for calculating center of gravity</span>
+Ad = @(x) x.*m1 + b1; <span class="comment">%functions for denominator of CoG formula</span>
+Bd = @(x) x.*m2 + b2;
+
+An = @(x) x.*(x.*m1 + b1); <span class="comment">%functions for numerator</span>
+Bn = @(x) x.*(x.*m2 + b2);
+
+CoG = (integral(An, kiteshape(2,1),kiteshape(2,2))+ <span class="keyword">...</span>
+       integral(Bn,kiteshape(2,2),kiteshape(2,3)))/ <span class="keyword">...</span>
+       (integral(Ad, kiteshape(2,1),kiteshape(2,2))+ <span class="keyword">...</span>
+       integral(Bd,kiteshape(2,2),kiteshape(2,3)));
+
+CoP = L/4; <span class="comment">%CoP is one fourth the relevant chord length</span>
+
+<span class="comment">%plot the CoP and CoG</span>
+plot(CoP,0, <span class="string">'.'</span>,<span class="string">"Color"</span>,<span class="string">'red'</span>,<span class="string">'MarkerSize'</span>,20)
+plot(CoG,0,<span class="string">'.'</span>,<span class="string">'Color'</span>,<span class="string">'green'</span>,<span class="string">'MarkerSize'</span>,20)
+legend(<span class="string">''</span>,<span class="string">''</span>, <span class="string">'Center of Pressure'</span>,<span class="string">'Center of Gravity'</span>)
+
+hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="kite_model_01.png" alt=""> <h2 id="5">dont forget about fsolve()</h2><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Kite Project
+% Thermal Fluid Systems FA23
+%
+% By Joe Leedy
+
+
+%%
+close all
+clear all
+clc
+
+%% Kite Shape Parameters
+% Kite is a simple diamond design with a cross beam at the COP (1/4 the
+% total length). This allows for more simplified complications. The
+% following section defines the length, width, and frontal area of my kite.
+
+W = 29; %length of beam (in)
+L = 29;
+
+W = W * 0.0254; %convert to meters
+L = L * 0.0254;
+
+A = (W*L)/2; % m^2 (surface area)
+%% Air Properties
+
+t_air = ((40-32)/1.8); % c
+hum_air = 40; % relative humidity %
+
+[rho_air,mu_air] = AirProperties(t_air,[],hum_air); %credit to @sjfitz on github for this funciton
+mu_air = mu_air * 0.1019; %conversion factor to kg/m-s
+%% Solving for Center of Pressure and Center of Gravity
+
+kiteshape = [0 W/2 0;0 L/4 L]; %points to plot the kite shape
+cline = [0 0;0 L];
+
+%plot the kite and a dashed centerline
+plot(kiteshape(2,:),kiteshape(1,:),'Color','blue'); axis equal
+hold on; plot(cline(2,:),cline(1,:), 'REPLACE_WITH_DASH_DASH', 'Color','black');
+
+% code for generating a peicewise function of the kite
+m1 = (W/2)/(kiteshape(2,2)-kiteshape(2,1)); %eq. 1
+b1 = 0;
+m2 = -(W/2)/(kiteshape(2,3)-kiteshape(2,2)); %eq. 2
+b2 = -m2*L;
+
+%code for calculating center of gravity
+Ad = @(x) x.*m1 + b1; %functions for denominator of CoG formula
+Bd = @(x) x.*m2 + b2;
+
+An = @(x) x.*(x.*m1 + b1); %functions for numerator
+Bn = @(x) x.*(x.*m2 + b2);
+
+CoG = (integral(An, kiteshape(2,1),kiteshape(2,2))+ ...
+       integral(Bn,kiteshape(2,2),kiteshape(2,3)))/ ...
+       (integral(Ad, kiteshape(2,1),kiteshape(2,2))+ ...
+       integral(Bd,kiteshape(2,2),kiteshape(2,3)));
+
+CoP = L/4; %CoP is one fourth the relevant chord length
+
+%plot the CoP and CoG
+plot(CoP,0, '.',"Color",'red','MarkerSize',20)
+plot(CoG,0,'.','Color','green','MarkerSize',20)
+legend('','', 'Center of Pressure','Center of Gravity')
+
+hold off
+%% dont forget about fsolve()
+##### SOURCE END #####
+--></body></html>
