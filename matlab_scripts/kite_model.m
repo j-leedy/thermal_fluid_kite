@@ -70,33 +70,45 @@ hold off
 
 %% Solving for Moments: Bridal Point Calculation
 
-x = 3 * 0.0254; %offset of bridal points from the ends of the kite
+x = 6 * 0.0254; %offset of bridal points from the ends of the kite
 
 a = ((3*L)/4) - x; %length from bridal point to CoP
 alpha = deg2rad(12); %setting flying angle
 r1 = a * tan(alpha); %magnitude of r1
 
-d = CoG - CoP; %distance between r1 and r2;
-theta = atan(d/r1);
-r2 = d/(sin(theta)); %magnitude of r2;
+d = CoG - CoP; %distance between r1 and r2
+omega = atan(d/r1); %angle between r1 and r2
+r2 = d/(sin(omega)); %magnitude of r2
+
+%other relevant angles
+theta = (pi/2) - alpha; %angle between r1 and bridle cord
+phi = theta - omega; %angle between r2 and bridle cord
 
 c = r1/(sin(alpha)); %length of bridle string from long end to CoP
 
 % plot bridal point, r1, r2 to check
 figure()
-plot([0,L],[0,0],"Color","Black"); axis equal; hold on
-plot((L-x),0,'.','MarkerSize',20,'Color','Blue') %near bridal point
-plot(x,0,'.','MarkerSize',20,'Color','Blue') %far bridal point
-plot([CoP,L-x],[-r1,0],'--','Color','Black') %bridal cord 1
-plot([x, CoP],[0,-r1],'--','Color','Black') %bridal cord 2
-plot(CoG,0,'.','MarkerSize',20,'Color','Red') %CoP
-plot(CoP,0,'.','MarkerSize',20,'Color','Green') %CoG
-plot([CoP,CoP],[-r1,0],'--','Color','Green') %r1
-plot([CoP,CoG],[-r1,0],'--','color','Red') %r2
-
+    plot([0,L],[0,0],"Color","Black"); axis equal; hold on
+    plot((L-x),0,'.','MarkerSize',20,'Color','Blue') %near bridal point
+    plot(x,0,'.','MarkerSize',20,'Color','Blue') %far bridal point
+    plot([CoP,L-x],[-r1,0],'--','Color','Black') %bridal cord 1
+    plot([x, CoP],[0,-r1],'--','Color','Black') %bridal cord 2
+    plot(CoG,0,'.','MarkerSize',20,'Color','Red') %CoP
+    plot(CoP,0,'.','MarkerSize',20,'Color','Green') %CoG
+    plot([CoP,CoP],[-r1,0],'--','Color','Green') %r1
+    plot([CoP,CoG],[-r1,0],'--','color','Red') %r2
+    legend('','Bridal Point','','Bridal String','','CoP','CoG','','')
 hold off
 
 %% Solving for Moments: The Moments (you have been waiting for)
+
+% x and y components of r1, r2, forces
+r1_v = [r1*cos(theta);
+        r1*sin(theta);
+        0]; %r1 in vector form using bridle point as origin
+r2_v = [r2*cos(phi);
+        r2*sin(phi);
+        0]; %r2 in vector form+
 
 %constants of lift and drag and etc
 
