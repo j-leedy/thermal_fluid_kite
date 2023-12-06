@@ -67,7 +67,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Kite Project</h1><!--introduction--><p>Thermal Fluid Systems FA23</p><p>By Joe Leedy</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Kite Shape Parameters</a></li><li><a href="#3">Air Properties</a></li><li><a href="#4">Solving for Center of Pressure and Center of Gravity</a></li><li><a href="#5">Solving for Moments: Bridal Point Calculation</a></li><li><a href="#6">Solving for Moments: The Moments</a></li><li><a href="#7">dont forget about fsolve()</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>
+  </style></head><body><div class="content"><h1>Kite Project</h1><!--introduction--><p>Thermal Fluid Systems FA23</p><p>By Joe Leedy</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Kite Shape Parameters</a></li><li><a href="#3">Air Properties</a></li><li><a href="#4">Solving for Center of Pressure and Center of Gravity</a></li><li><a href="#5">Solving for Moments: Bridal Point Calculation</a></li><li><a href="#6">Solving for Moments: The Moments (you have been waiting for)</a></li><li><a href="#7">dont forget about fsolve()</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>
 clear <span class="string">all</span>
 clc
 </pre><h2 id="2">Kite Shape Parameters</h2><p>Kite is a simple diamond design with a cross beam at the COP (1/4 the total length). This allows for more simplified complications. The following section defines the length, width, and frontal area of my kite.</p><pre class="codeinput">W = 29; <span class="comment">%length of beam (in)</span>
@@ -84,13 +84,7 @@ hum_air = 40; <span class="comment">% relative humidity %</span>
 mu_air = mu_air * 0.1019; <span class="comment">%conversion factor to kg/m-s</span>
 
 t_air = t_air + 273; <span class="comment">%convert to K</span>
-</pre><h2 id="4">Solving for Center of Pressure and Center of Gravity</h2><pre class="codeinput">kiteshape = [0 W/2 0;0 L/4 L]; <span class="comment">%points to plot the kite shape</span>
-cline = [0 0;0 L];
-
-<span class="comment">%plot the kite and a dashed centerline</span>
-plot(kiteshape(2,:),kiteshape(1,:),<span class="string">'Color'</span>,<span class="string">'blue'</span>); axis <span class="string">equal</span>
-hold <span class="string">on</span>; plot(cline(2,:),cline(1,:), <span class="string">'--'</span>, <span class="string">'Color'</span>,<span class="string">'black'</span>);
-
+</pre><h2 id="4">Solving for Center of Pressure and Center of Gravity</h2><pre class="codeinput">kiteshape = [0 W/2 0;0 L/4 L];
 <span class="comment">% code for generating a peicewise function of the kite</span>
 m1 = (W/2)/(kiteshape(2,2)-kiteshape(2,1)); <span class="comment">%eq. 1</span>
 b1 = 0;
@@ -111,43 +105,42 @@ CoG = (integral(An, kiteshape(2,1),kiteshape(2,2))+ <span class="keyword">...</s
 
 CoP = L/4; <span class="comment">%CoP is one fourth the relevant chord length</span>
 
-<span class="comment">%plot the CoP and CoG</span>
-plot(CoP,0, <span class="string">'.'</span>,<span class="string">"Color"</span>,<span class="string">'red'</span>,<span class="string">'MarkerSize'</span>,20)
-plot(CoG,0,<span class="string">'.'</span>,<span class="string">'Color'</span>,<span class="string">'green'</span>,<span class="string">'MarkerSize'</span>,20)
-legend(<span class="string">''</span>,<span class="string">''</span>, <span class="string">'Center of Pressure'</span>,<span class="string">'Center of Gravity'</span>)
-
-hold <span class="string">off</span>
-</pre><img vspace="5" hspace="5" src="kite_model_01.png" alt=""> <h2 id="5">Solving for Moments: Bridal Point Calculation</h2><pre class="codeinput">x = 3 * 0.0254; <span class="comment">%offset of bridal points from the ends of the kite</span>
+plotkite(kiteshape,CoP,CoG);
+</pre><img vspace="5" hspace="5" src="kite_model_01.png" alt=""> <h2 id="5">Solving for Moments: Bridal Point Calculation</h2><pre class="codeinput">x = 6 * 0.0254; <span class="comment">%offset of bridal points from the ends of the kite</span>
 
 a = ((3*L)/4) - x; <span class="comment">%length from bridal point to CoP</span>
 alpha = deg2rad(12); <span class="comment">%setting flying angle</span>
 r1 = a * tan(alpha); <span class="comment">%magnitude of r1</span>
 
-d = CoG - CoP; <span class="comment">%distance between r1 and r2;</span>
-theta = atan(d/r1);
-r2 = d/(sin(theta)); <span class="comment">%magnitude of r2;</span>
+d = CoG - CoP; <span class="comment">%distance between r1 and r2</span>
+omega = atan(d/r1); <span class="comment">%angle between r1 and r2</span>
+r2 = d/(sin(omega)); <span class="comment">%magnitude of r2</span>
+
+<span class="comment">%other relevant angles</span>
+theta = (pi/2) - alpha; <span class="comment">%angle between r1 and bridle cord</span>
+phi = theta - omega; <span class="comment">%angle between r2 and bridle cord</span>
 
 c = r1/(sin(alpha)); <span class="comment">%length of bridle string from long end to CoP</span>
 
 <span class="comment">% plot bridal point, r1, r2 to check</span>
-figure()
-plot([0,L],[0,0],<span class="string">"Color"</span>,<span class="string">"Black"</span>); axis <span class="string">equal</span>; hold <span class="string">on</span>
-plot((L-x),0,<span class="string">'.'</span>,<span class="string">'MarkerSize'</span>,20,<span class="string">'Color'</span>,<span class="string">'Blue'</span>)
-plot([CoP,L-x],[-r1,0],<span class="string">'--'</span>,<span class="string">'Color'</span>,<span class="string">'Black'</span>)
-plot(CoG,0,<span class="string">'.'</span>,<span class="string">'MarkerSize'</span>,20,<span class="string">'Color'</span>,<span class="string">'Red'</span>)
-plot(CoP,0,<span class="string">'.'</span>,<span class="string">'MarkerSize'</span>,20,<span class="string">'Color'</span>,<span class="string">'Green'</span>)
-plot([CoP,CoP],[-r1,0],<span class="string">'--'</span>,<span class="string">'Color'</span>,<span class="string">'Green'</span>)
-plot([CoP,CoG],[-r1,0],<span class="string">'--'</span>,<span class="string">'color'</span>,<span class="string">'Red'</span>)
+bridleplot(L,x,x,CoP,CoG,r1)
+</pre><img vspace="5" hspace="5" src="kite_model_02.png" alt=""> <h2 id="6">Solving for Moments: The Moments (you have been waiting for)</h2><pre class="codeinput"><span class="comment">% x and y components of r1, r2, forces</span>
+r1_v = [r1*cos(theta);
+        r1*sin(theta);
+        0]; <span class="comment">%r1 in vector form using bridle point as origin</span>
+r2_v = [r2*cos(phi);
+        r2*sin(phi);
+        0]; <span class="comment">%r2 in vector form+</span>
 
-hold <span class="string">off</span>
-</pre><img vspace="5" hspace="5" src="kite_model_02.png" alt=""> <img vspace="5" hspace="5" src="kite_model_03.png" alt=""> <h2 id="6">Solving for Moments: The Moments</h2><p>```code block```</p><h2 id="7">dont forget about fsolve()</h2><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+<span class="comment">% parameter sweep on bridal point</span>
+
+x_trial = linspace(6,16,100) .* .0254; <span class="comment">%experimental values for bridal point</span>
+</pre><h2 id="7">dont forget about fsolve()</h2><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Kite Project 
 % Thermal Fluid Systems FA23
 % 
 % By Joe Leedy
-
-
 %%
 close all
 clear all
@@ -175,14 +168,7 @@ mu_air = mu_air * 0.1019; %conversion factor to kg/m-s
 
 t_air = t_air + 273; %convert to K
 %% Solving for Center of Pressure and Center of Gravity
-
-kiteshape = [0 W/2 0;0 L/4 L]; %points to plot the kite shape
-cline = [0 0;0 L];
-
-%plot the kite and a dashed centerline
-plot(kiteshape(2,:),kiteshape(1,:),'Color','blue'); axis equal
-hold on; plot(cline(2,:),cline(1,:), 'REPLACE_WITH_DASH_DASH', 'Color','black'); 
-
+kiteshape = [0 W/2 0;0 L/4 L];
 % code for generating a peicewise function of the kite
 m1 = (W/2)/(kiteshape(2,2)-kiteshape(2,1)); %eq. 1
 b1 = 0;
@@ -203,41 +189,43 @@ CoG = (integral(An, kiteshape(2,1),kiteshape(2,2))+ ...
 
 CoP = L/4; %CoP is one fourth the relevant chord length 
 
-%plot the CoP and CoG
-plot(CoP,0, '.',"Color",'red','MarkerSize',20)
-plot(CoG,0,'.','Color','green','MarkerSize',20)
-legend('','', 'Center of Pressure','Center of Gravity')
-
-hold off
-
+plotkite(kiteshape,CoP,CoG);
 %% Solving for Moments: Bridal Point Calculation
 
-x = 3 * 0.0254; %offset of bridal points from the ends of the kite
+x = 6 * 0.0254; %offset of bridal points from the ends of the kite
 
 a = ((3*L)/4) - x; %length from bridal point to CoP
 alpha = deg2rad(12); %setting flying angle
 r1 = a * tan(alpha); %magnitude of r1
 
-d = CoG - CoP; %distance between r1 and r2;
-theta = atan(d/r1);
-r2 = d/(sin(theta)); %magnitude of r2;
+d = CoG - CoP; %distance between r1 and r2
+omega = atan(d/r1); %angle between r1 and r2
+r2 = d/(sin(omega)); %magnitude of r2
+
+%other relevant angles
+theta = (pi/2) - alpha; %angle between r1 and bridle cord
+phi = theta - omega; %angle between r2 and bridle cord
 
 c = r1/(sin(alpha)); %length of bridle string from long end to CoP
 
 % plot bridal point, r1, r2 to check
-figure()
-plot([0,L],[0,0],"Color","Black"); axis equal; hold on
-plot((L-x),0,'.','MarkerSize',20,'Color','Blue')
-plot([CoP,L-x],[-r1,0],'REPLACE_WITH_DASH_DASH','Color','Black')
-plot(CoG,0,'.','MarkerSize',20,'Color','Red')
-plot(CoP,0,'.','MarkerSize',20,'Color','Green')
-plot([CoP,CoP],[-r1,0],'REPLACE_WITH_DASH_DASH','Color','Green')
-plot([CoP,CoG],[-r1,0],'REPLACE_WITH_DASH_DASH','color','Red')
+bridleplot(L,x,x,CoP,CoG,r1)
 
-hold off
+%% Solving for Moments: The Moments (you have been waiting for)
 
-%% Solving for Moments: The Moments
-% ```code block```
+% x and y components of r1, r2, forces
+r1_v = [r1*cos(theta);
+        r1*sin(theta);
+        0]; %r1 in vector form using bridle point as origin
+r2_v = [r2*cos(phi);
+        r2*sin(phi);
+        0]; %r2 in vector form+
+
+% parameter sweep on bridal point
+
+x_trial = linspace(6,16,100) .* .0254; %experimental values for bridal point
+
+
 %% dont forget about fsolve()
 ##### SOURCE END #####
 --></body></html>

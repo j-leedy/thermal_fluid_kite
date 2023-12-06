@@ -13,11 +13,11 @@ figure()
     plot(x1,0,'.','MarkerSize',20,'Color','Blue') %far bridal point
     plot([CoP,L-x1],[-r1,0],'--','Color','Black') %bridal cord 1
     plot([x2, CoP],[0,-r1],'--','Color','Black') %bridal cord 2
-    plot(CoG,0,'.','MarkerSize',20,'Color','Red') %CoP
-    plot(CoP,0,'.','MarkerSize',20,'Color','Green') %CoG
-    plot([CoP,CoP],[-r1,0],'--','Color','Green') %r1
-    plot([CoP,CoG],[-r1,0],'--','color','Red') %r2
-    legend('','Bridal Point','','Bridal Cords','','CoP','CoG','','')
+    plot(CoG,0,'.','MarkerSize',20,'Color','Green') %CoG
+    plot(CoP,0,'.','MarkerSize',20,'Color','Red') %CoP
+    plot([CoP,CoP],[-r1,0],'--','Color','Red') %r1
+    plot([CoP,CoG],[-r1,0],'--','color','Green') %r2
+    legend('','Bridal Point','','Bridal Cords','','CoG','CoP','','')
     xlabel('Length(m)'); ylabel('Height (m)')
     title('Side View of Kite with Bridle Points and Cords Visualized')
 hold off

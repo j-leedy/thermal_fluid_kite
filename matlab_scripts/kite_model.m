@@ -2,8 +2,6 @@
 % Thermal Fluid Systems FA23
 % 
 % By Joe Leedy
-
-
 %%
 close all
 clear all
@@ -21,15 +19,26 @@ W = W * 0.0254; %convert to meters
 L = L * 0.0254;
 
 A = (W*L)/2; % m^2 (surface area)
+
+% kite mass
+rods = 26 / 1000; %mass in kg of dowel cross bars
+
+rho_paper = 1.15e3; %kg/m3
+thck_paper = .1 / 1000; %m
+paper = rho_paper*thck_paper*A; %mass of paper in kg
+m = paper + rods; %mass of kite assuming tape + string are negligible
 %% Air Properties
 
 t_air = ((40-32)/1.8); % c
 hum_air = 40; % relative humidity %
 
-[rho_air,mu_air] = AirProperties(t_air,[],hum_air); %credit to @sjfitz on github for this funciton
+%credit to @sjfitz on github for this funciton
+[rho_air,mu_air] = AirProperties(t_air,[],hum_air); 
+
 mu_air = mu_air * 0.1019; %conversion factor to kg/m-s
 
 t_air = t_air + 273; %convert to K
+V_air = 4.5; %m/s
 %% Solving for Center of Pressure and Center of Gravity
 kiteshape = [0 W/2 0;0 L/4 L];
 % code for generating a peicewise function of the kite
@@ -86,7 +95,19 @@ r2_v = [r2*cos(phi);
 
 % parameter sweep on bridal point
 
-x_trial = linspace(6,16,100) .* .0254; %experimental values for bridal point
+x_trial = linspace(3,13,100) .* 0.0254; %experimental values for bridal point
+x2_tmp = 6 * 0.0254; 
+r1vt = zeros(3,1);
+r2vt = zeros(3,1);
+moment_t = zeros(3,length(x_trial),1);
+
+%this doesn't work! evaluate with emily in class tmmr
+for i = 1:length(x_trial)
+    [r1vt,r2vt] = bridlepts(alpha,x_trial(i),L,d);
+    moment_t(:,i) = moments(A,alpha,V_air,rho_air,r1vt,r2vt,m);
+end
+torques = moment_t(3,:);
+[~,ideal_idx] = sort(torques,'ascend');
 
 
 %% dont forget about fsolve()
