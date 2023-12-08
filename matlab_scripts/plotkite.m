@@ -1,8 +1,11 @@
 function [] = plotkite(kiteshape, CoP, CoG)
-%PLOTKITE Plots the shape of a simple diamond kite along with CoP and CoG
-%   Input dimensions of the cross beams of your kite and gaze in awe as my
+%PLOTKITE Plots the shape of a simple diamond kite along with CoP and CoG*
+%   Input dimensions of the cross beams of your kite** and gaze in awe as my
 %   function quickly plots the shape! Mostly used to clean up code in main
 %   script. 
+%
+%   *only input the x-coordinate of CoP/CoG
+%   **in the form of a 2x3 double: [y1,y2,y3; x1,x2,x3]
 
 %Governing geometry
 L = kiteshape(2,3);
