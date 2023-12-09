@@ -17,15 +17,15 @@ function [r1,r2,r1v,r2v] = bridlept(L,CoG,CoP,Bi,alpha)
 
 %L_b = L*cos(alpha); %projection of kite L along angle of attack
 a1 = L - CoG; %distance to CoG from near end of kite
-a2 = a1 - CoP; %distance to CoP from same
+a2 = L - CoP; %distance to CoP from same
 
 % Calculate y-component of reaction vectors
 Y_g = a1*sin(alpha); 
 Y_p = a2*sin(alpha); 
 
 % Calculate x-component of reaction vectors
-X_g = a1*cos(alpha) - Bi; 
-X_p = a2*cos(alpha) - Bi; 
+X_p = a1*cos(alpha) - Bi; 
+X_g = a2*cos(alpha) - Bi; 
 
 % Creating Reaction Vectors
 r1v = [X_p,Y_p,0];
@@ -35,6 +35,6 @@ r2v = [X_g,Y_g,0];
 theta = atan(Y_p/X_p); %angle between r1 and projected length
 phi = atan(Y_g/X_g); %angle between r2 and same
 
-r1 = sin(theta)/Y_p;
-r2 = sin(phi)/Y_g;
+r1 = norm(r1v);
+r2 = norm(r2v);
 end

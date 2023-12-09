@@ -66,7 +66,7 @@ CoP = L/4; %CoP is one fourth the relevant chord length
 plotkite(kiteshape,CoP,CoG);
 %% Solving for Moments: Bridal Point Calculation
 
-Bi = .1; %set initial bridle point
+Bi = .275; %set initial bridle point
 [r1,r2,r1v,r2v] = bridlept(L,CoG,CoP,Bi,alpha); %calc reaction vectors
 
 % plot bridal point, r1, r2 to check
@@ -76,7 +76,7 @@ BiP = bridleplotting(L,CoG,CoP,r1v);
 [moment,F_d,F_l,F_g,F_by,F_bx] = moments(A,alpha,V_air,rho_air,r1v,r2v,m);
 moment = moment(3);
 %% Solving for Moments: The Moments (you have been waiting for)
-BiT = linspace(0,.2,100);
+BiT = linspace(.3,.4,100);
 r1vT = zeros(100,3);
 r2vT = zeros(100,3);
 momT = zeros(100,3);
