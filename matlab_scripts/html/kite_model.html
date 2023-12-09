@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Kite Project</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-12-04"><meta name="DC.source" content="kite_model.m"><style type="text/css">
+      --><title>Kite Project</title><meta name="generator" content="MATLAB 9.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-12-08"><meta name="DC.source" content="kite_model.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,75 +67,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Kite Project</h1><!--introduction--><p>Thermal Fluid Systems FA23</p><p>By Joe Leedy</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Kite Shape Parameters</a></li><li><a href="#3">Air Properties</a></li><li><a href="#4">Solving for Center of Pressure and Center of Gravity</a></li><li><a href="#5">Solving for Moments: Bridal Point Calculation</a></li><li><a href="#6">Solving for Moments: The Moments (you have been waiting for)</a></li><li><a href="#7">dont forget about fsolve()</a></li></ul></div><pre class="codeinput">close <span class="string">all</span>
-clear <span class="string">all</span>
-clc
-</pre><h2 id="2">Kite Shape Parameters</h2><p>Kite is a simple diamond design with a cross beam at the COP (1/4 the total length). This allows for more simplified complications. The following section defines the length, width, and frontal area of my kite.</p><pre class="codeinput">W = 29; <span class="comment">%length of beam (in)</span>
-L = 29;
-
-W = W * 0.0254; <span class="comment">%convert to meters</span>
-L = L * 0.0254;
-
-A = (W*L)/2; <span class="comment">% m^2 (surface area)</span>
-</pre><h2 id="3">Air Properties</h2><pre class="codeinput">t_air = ((40-32)/1.8); <span class="comment">% c</span>
-hum_air = 40; <span class="comment">% relative humidity %</span>
-
-[rho_air,mu_air] = AirProperties(t_air,[],hum_air); <span class="comment">%credit to @sjfitz on github for this funciton</span>
-mu_air = mu_air * 0.1019; <span class="comment">%conversion factor to kg/m-s</span>
-
-t_air = t_air + 273; <span class="comment">%convert to K</span>
-</pre><h2 id="4">Solving for Center of Pressure and Center of Gravity</h2><pre class="codeinput">kiteshape = [0 W/2 0;0 L/4 L];
-<span class="comment">% code for generating a peicewise function of the kite</span>
-m1 = (W/2)/(kiteshape(2,2)-kiteshape(2,1)); <span class="comment">%eq. 1</span>
-b1 = 0;
-m2 = -(W/2)/(kiteshape(2,3)-kiteshape(2,2)); <span class="comment">%eq. 2</span>
-b2 = -m2*L;
-
-<span class="comment">%code for calculating center of gravity</span>
-Ad = @(x) x.*m1 + b1; <span class="comment">%functions for denominator of CoG formula</span>
-Bd = @(x) x.*m2 + b2;
-
-An = @(x) x.*(x.*m1 + b1); <span class="comment">%functions for numerator</span>
-Bn = @(x) x.*(x.*m2 + b2);
-
-CoG = (integral(An, kiteshape(2,1),kiteshape(2,2))+ <span class="keyword">...</span>
-       integral(Bn,kiteshape(2,2),kiteshape(2,3)))/ <span class="keyword">...</span>
-       (integral(Ad, kiteshape(2,1),kiteshape(2,2))+ <span class="keyword">...</span>
-       integral(Bd,kiteshape(2,2),kiteshape(2,3)));
-
-CoP = L/4; <span class="comment">%CoP is one fourth the relevant chord length</span>
-
-plotkite(kiteshape,CoP,CoG);
-</pre><img vspace="5" hspace="5" src="kite_model_01.png" alt=""> <h2 id="5">Solving for Moments: Bridal Point Calculation</h2><pre class="codeinput">x = 6 * 0.0254; <span class="comment">%offset of bridal points from the ends of the kite</span>
-
-a = ((3*L)/4) - x; <span class="comment">%length from bridal point to CoP</span>
-alpha = deg2rad(12); <span class="comment">%setting flying angle</span>
-r1 = a * tan(alpha); <span class="comment">%magnitude of r1</span>
-
-d = CoG - CoP; <span class="comment">%distance between r1 and r2</span>
-omega = atan(d/r1); <span class="comment">%angle between r1 and r2</span>
-r2 = d/(sin(omega)); <span class="comment">%magnitude of r2</span>
-
-<span class="comment">%other relevant angles</span>
-theta = (pi/2) - alpha; <span class="comment">%angle between r1 and bridle cord</span>
-phi = theta - omega; <span class="comment">%angle between r2 and bridle cord</span>
-
-c = r1/(sin(alpha)); <span class="comment">%length of bridle string from long end to CoP</span>
-
-<span class="comment">% plot bridal point, r1, r2 to check</span>
-bridleplot(L,x,x,CoP,CoG,r1)
-</pre><img vspace="5" hspace="5" src="kite_model_02.png" alt=""> <h2 id="6">Solving for Moments: The Moments (you have been waiting for)</h2><pre class="codeinput"><span class="comment">% x and y components of r1, r2, forces</span>
-r1_v = [r1*cos(theta);
-        r1*sin(theta);
-        0]; <span class="comment">%r1 in vector form using bridle point as origin</span>
-r2_v = [r2*cos(phi);
-        r2*sin(phi);
-        0]; <span class="comment">%r2 in vector form+</span>
-
-<span class="comment">% parameter sweep on bridal point</span>
-
-x_trial = linspace(6,16,100) .* .0254; <span class="comment">%experimental values for bridal point</span>
-</pre><h2 id="7">dont forget about fsolve()</h2><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
+  </style></head><body><div class="content"><h1>Kite Project</h1><!--introduction--><p>Thermal Fluid Systems FA23</p><p>By Joe Leedy</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Kite Shape Parameters</a></li><li><a href="#3">Air Properties</a></li><li><a href="#4">Solving for Center of Pressure and Center of Gravity</a></li><li><a href="#5">Solving for Moments: Bridal Point Calculation</a></li><li><a href="#6">Solving for Moments: The Moments (you have been waiting for)</a></li><li><a href="#7">dont forget about fsolve()</a></li></ul></div><h2 id="2">Kite Shape Parameters</h2><p>Kite is a simple diamond design with a cross beam at the COP (1/4 the total length). This allows for more simplified complications. The following section defines the length, width, and frontal area of my kite.</p><h2 id="3">Air Properties</h2><h2 id="4">Solving for Center of Pressure and Center of Gravity</h2><img vspace="5" hspace="5" src="kite_model_01.png" alt=""> <h2 id="5">Solving for Moments: Bridal Point Calculation</h2><img vspace="5" hspace="5" src="kite_model_02.png" alt=""> <h2 id="6">Solving for Moments: The Moments (you have been waiting for)</h2><h2 id="7">dont forget about fsolve()</h2><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Kite Project 
 % Thermal Fluid Systems FA23
@@ -143,7 +75,7 @@ x_trial = linspace(6,16,100) .* .0254; <span class="comment">%experimental value
 % By Joe Leedy
 %%
 close all
-clear all
+clear 
 clc
 
 %% Kite Shape Parameters
@@ -158,15 +90,29 @@ W = W * 0.0254; %convert to meters
 L = L * 0.0254;
 
 A = (W*L)/2; % m^2 (surface area)
+
+% kite mass
+rods = 26 / 1000; %mass in kg of dowel cross bars
+
+rho_paper = 1.15e3; %kg/m3
+thck_paper = .1 / 1000; %m
+paper = rho_paper*thck_paper*A; %mass of paper in kg
+m = paper + rods; %mass of kite assuming tape + string are negligible
+
+% angle of attack
+alpha = deg2rad(12);
 %% Air Properties
 
-t_air = ((40-32)/1.8); % c
+t_air = ((40-32)/1.8); % °C
 hum_air = 40; % relative humidity %
 
-[rho_air,mu_air] = AirProperties(t_air,[],hum_air); %credit to @sjfitz on github for this funciton
+%credit to @sjfitz on github for this funciton
+[rho_air,mu_air] = AirProperties(t_air,[],hum_air); 
+
 mu_air = mu_air * 0.1019; %conversion factor to kg/m-s
 
 t_air = t_air + 273; %convert to K
+V_air = 4; %m/s
 %% Solving for Center of Pressure and Center of Gravity
 kiteshape = [0 W/2 0;0 L/4 L];
 % code for generating a peicewise function of the kite
@@ -192,40 +138,42 @@ CoP = L/4; %CoP is one fourth the relevant chord length
 plotkite(kiteshape,CoP,CoG);
 %% Solving for Moments: Bridal Point Calculation
 
-x = 6 * 0.0254; %offset of bridal points from the ends of the kite
-
-a = ((3*L)/4) - x; %length from bridal point to CoP
-alpha = deg2rad(12); %setting flying angle
-r1 = a * tan(alpha); %magnitude of r1
-
-d = CoG - CoP; %distance between r1 and r2
-omega = atan(d/r1); %angle between r1 and r2
-r2 = d/(sin(omega)); %magnitude of r2
-
-%other relevant angles
-theta = (pi/2) - alpha; %angle between r1 and bridle cord
-phi = theta - omega; %angle between r2 and bridle cord
-
-c = r1/(sin(alpha)); %length of bridle string from long end to CoP
+Bi = .1; %set initial bridle point
+[r1,r2,r1v,r2v] = bridlept(L,CoG,CoP,Bi,alpha); %calc reaction vectors
 
 % plot bridal point, r1, r2 to check
-bridleplot(L,x,x,CoP,CoG,r1)
+bridleplotting(L,CoG,CoP,r1v);
 
+%check for moment eq
+moment = moments(A,alpha,V_air,rho_air,r1v,r2v,m);
+moment = moment(3);
 %% Solving for Moments: The Moments (you have been waiting for)
-
-% x and y components of r1, r2, forces
+%{
+% x and y components of r1, r2
 r1_v = [r1*cos(theta);
         r1*sin(theta);
         0]; %r1 in vector form using bridle point as origin
 r2_v = [r2*cos(phi);
         r2*sin(phi);
-        0]; %r2 in vector form+
+        0]; %r2 in vector form
 
 % parameter sweep on bridal point
 
-x_trial = linspace(6,16,100) .* .0254; %experimental values for bridal point
+x_trial = linspace(1,13,100) .* 0.0254; %experimental values for bridal point
+x2_tmp = 6 * 0.0254; 
+r1vt = zeros(3,1);
+r2vt = zeros(3,1);
+moment_t = zeros(3,length(x_trial),1);
 
-
+%this doesn't work! evaluate with emily in class tmmr
+for i = 1:length(x_trial)
+    [r1vt,r2vt] = bridlepts(alpha,x_trial(i),L,d);
+    moment_t(:,i) = moments(A,alpha,V_air,rho_air,r1vt,r2vt,m);
+end
+torques = moment_t(3,:);
+[~,ideal_idx] = sort(torques,'ascend');
+%}
+%bridleplot(L,x_trial(100),x2_tmp,CoP,CoG,norm(r1vt))
 %% dont forget about fsolve()
 ##### SOURCE END #####
 --></body></html>

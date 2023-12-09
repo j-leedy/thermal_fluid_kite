@@ -26,13 +26,7 @@ Y_p = a2*sin(alpha);
 % Calculate x-component of reaction vectors
 X_g = a1*cos(alpha) - Bi; 
 X_p = a2*cos(alpha) - Bi; 
-%{
-X_g = L - X_g; %changing frame of reference to be far end of kite
-X_p = L - X_p;
 
-X_g = X_g - Bi; %changing origin to be bridle pt
-X_p = X_p - Bi;
-%}
 % Creating Reaction Vectors
 r1v = [X_p,Y_p,0];
 r2v = [X_g,Y_g,0];

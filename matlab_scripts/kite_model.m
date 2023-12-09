@@ -6,10 +6,9 @@
 close all
 clear 
 clc
-
 %% Kite Shape Parameters
 % Kite is a simple diamond design with a cross beam at the COP (1/4 the
-% total length). This allows for more simplified complications. The
+% total length). This allows for more simplified calculations. The
 % following section defines the length, width, and frontal area of my kite.
 
 W = 29; %length of beam (in)
@@ -41,7 +40,7 @@ hum_air = 40; % relative humidity %
 mu_air = mu_air * 0.1019; %conversion factor to kg/m-s
 
 t_air = t_air + 273; %convert to K
-V_air = 4; %m/s
+V_air = 5.6; %m/s
 %% Solving for Center of Pressure and Center of Gravity
 kiteshape = [0 W/2 0;0 L/4 L];
 % code for generating a peicewise function of the kite
@@ -68,38 +67,32 @@ plotkite(kiteshape,CoP,CoG);
 %% Solving for Moments: Bridal Point Calculation
 
 Bi = .1; %set initial bridle point
-[r1,r2,r1v,r2v] = bridlept(L,CoG,CoP,Bi,alpha);
+[r1,r2,r1v,r2v] = bridlept(L,CoG,CoP,Bi,alpha); %calc reaction vectors
 
 % plot bridal point, r1, r2 to check
-bridleplotting(L,CoG,CoP,r1v);
+BiP = bridleplotting(L,CoG,CoP,r1v);
 
 %check for moment eq
-moments(A,alpha,V_air,rho_air,r1v,r2v,m)
+[moment,F_d,F_l,F_g,F_by,F_bx] = moments(A,alpha,V_air,rho_air,r1v,r2v,m);
+moment = moment(3);
 %% Solving for Moments: The Moments (you have been waiting for)
-%{
-% x and y components of r1, r2
-r1_v = [r1*cos(theta);
-        r1*sin(theta);
-        0]; %r1 in vector form using bridle point as origin
-r2_v = [r2*cos(phi);
-        r2*sin(phi);
-        0]; %r2 in vector form
+BiT = linspace(0,.2,100);
+r1vT = zeros(100,3);
+r2vT = zeros(100,3);
+momT = zeros(100,3);
 
-% parameter sweep on bridal point
-
-x_trial = linspace(1,13,100) .* 0.0254; %experimental values for bridal point
-x2_tmp = 6 * 0.0254; 
-r1vt = zeros(3,1);
-r2vt = zeros(3,1);
-moment_t = zeros(3,length(x_trial),1);
-
-%this doesn't work! evaluate with emily in class tmmr
-for i = 1:length(x_trial)
-    [r1vt,r2vt] = bridlepts(alpha,x_trial(i),L,d);
-    moment_t(:,i) = moments(A,alpha,V_air,rho_air,r1vt,r2vt,m);
+for i  = 1:length(BiT)
+    [~,~,r1vT(i,:),r2vT(i,:)] = bridlept(L,CoG,CoP,BiT(i),alpha);
+    [momT(i,:),~,~,~] = moments(A,alpha,V_air,rho_air,r1vT(i,:),r2vT(i,:),m);
 end
-torques = moment_t(3,:);
-[~,ideal_idx] = sort(torques,'ascend');
-%}
-%bridleplot(L,x_trial(100),x2_tmp,CoP,CoG,norm(r1vt))
+
+momT = momT(:,3);
+[~,idx] = min(abs(momT));
+figure();plot(BiT,momT); hold on
+plot(BiT(idx),momT(idx),'.','color','red','MarkerSize',12)
+xlabel('Sampled Values of Bridle Point Offset')
+ylabel('Torque (N-m)')
+hold off
+%% Final Kite Design
+% Optimized for 5.5 m/s wind speed and a 12° angle of attack
 %% dont forget about fsolve()

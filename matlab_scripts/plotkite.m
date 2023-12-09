@@ -11,7 +11,7 @@ function [] = plotkite(kiteshape, CoP, CoG)
 L = kiteshape(2,3);
 cline = [0 0;0 L];
 
-%plotting@
+%plotting
 figure()
     %plot the kite and a dashed centerline
     plot(kiteshape(2,:),kiteshape(1,:),'Color','blue'); axis equal
@@ -26,6 +26,6 @@ figure()
 
     xlabel('Length (m)'); ylabel('Width (m)')
     title('Visualization of Proposed Kite with CoP and CoG')
-    hold off
+hold off
 end
 

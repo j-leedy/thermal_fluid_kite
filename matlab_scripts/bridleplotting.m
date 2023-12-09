@@ -22,6 +22,7 @@ figure();
     plot([0,BiX],[0,BiY],'Color','Blue') %bridle cords
     plot([BiX,L],[BiY,0],'Color','Blue')
     legend('','CoP','CoG','Bridle Point','','','Bridle Cords','','Location','Southeast')
+    xlabel('Length (m)'); ylabel('Height (m)')
 hold off
 
 end
