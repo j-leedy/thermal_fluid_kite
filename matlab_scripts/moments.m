@@ -25,6 +25,6 @@ F_d_v = [r1(1) + F_drag; r1(2); 0];
 
 %sum of moments
 eq_torque = cross(F_g_v,r2) + cross(F_l_v,r1) + cross(F_d_v,r1);
-
+eq_torque = eq_torque(3);
 end
 

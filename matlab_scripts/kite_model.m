@@ -66,17 +66,16 @@ CoP = L/4; %CoP is one fourth the relevant chord length
 plotkite(kiteshape,CoP,CoG);
 %% Solving for Moments: Bridal Point Calculation
 
-Bi = .275; %set initial bridle point
-[r1,r2,r1v,r2v] = bridlept(L,CoG,CoP,Bi,alpha); %calc reaction vectors
+Bi = .215; %set initial bridle point
+[~,~,r1v,r2v,BiV] = bridlept(L,CoG,CoP,Bi,alpha); %calc reaction vectors
 
 % plot bridal point, r1, r2 to check
-BiP = bridleplotting(L,CoG,CoP,r1v);
+bridleplotting(L,CoG,CoP,r1v,r2v,BiV);
 
 %check for moment eq
-[moment,F_d,F_l,F_g,F_by,F_bx] = moments(A,alpha,V_air,rho_air,r1v,r2v,m);
-moment = moment(3);
+[moment,~,~,~,~,~] = moments(A,alpha,V_air,rho_air,r1v,r2v,m);
 %% Solving for Moments: The Moments (you have been waiting for)
-BiT = linspace(.3,.4,100);
+BiT = linspace(.1,.15,100);
 r1vT = zeros(100,3);
 r2vT = zeros(100,3);
 momT = zeros(100,3);
@@ -93,6 +92,12 @@ plot(BiT(idx),momT(idx),'.','color','red','MarkerSize',12)
 xlabel('Sampled Values of Bridle Point Offset')
 ylabel('Torque (N-m)')
 hold off
+
+Bi = BiT(idx);
 %% Final Kite Design
 % Optimized for 5.5 m/s wind speed and a 12° angle of attack
+
+[~,~,r1v,r2v,BiV] = bridlept(L,CoG,CoP,Bi,alpha);
+[torque,F_d,F_l,F_g,F_bx,F_by] = moments(A,alpha,V_air,rho_air,r1v,r2v,m);
+bridleplotting(L,CoG,CoP,r1v,r2v,BiV)
 %% dont forget about fsolve()
