@@ -17,7 +17,7 @@ function [r1,r2,r1v,r2v,BiV] = bridlept(L,CoG,CoP,Bi,alpha)
 
 Lb = L/cos(alpha); %Projection of kite along AoA
 c = Lb-Bi; %Distance between far end of kite and bridle point
-b = c*cos(alpha); %x-distance between bridle point and kite
+b = c*cos(alpha); %x-distance between bridle point and kite origin
 a = c*sin(alpha); %y-distance between and of kite and projected bridle pt
 
 % Calculate y-component of reaction vectors
