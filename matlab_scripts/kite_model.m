@@ -107,8 +107,15 @@ F_G_v = [0; F_g];
 F_D_v = [F_d; 0];
 F_L_v = [0; F_l];
 F_B_v = [F_bx; F_by];
-
+%% FBD
 %fbd plot; looks bad, won't be trying to use matlab for this again.
+R = [cos(-alpha), -sin(-alpha);
+     sin(-alpha), cos(-alpha)];
+F_G_v = R * F_G_v;
+F_D_v = R * F_D_v;
+F_L_v = R * F_L_v;
+F_B_v = R * F_B_v;
+
 figure();
     plot([0,L],[0,0],'Color','Black') %Kite side view
     %axis equal;
@@ -123,7 +130,7 @@ figure();
     quiver(CoG, 0, F_G_v(1),F_G_v(2)) %gravity force
     quiver(CoP, 0, F_D_v(1),F_L_v(2)) %pressure force
     %quiver(CoP, 0, F_L_v(1),F_L_v(2)) %lift force
-    quiver(BiV(1),BiV(2),F_B_v(1),F_B_v(2)) %tension force
+    quiver(BiV(1),BiV(2),F_B_v(2),F_B_v(1)) %tension force
     legend('','CoP','CoG','Bridle Point','','','F_{grav}','F_{pressure}','F_{tension}','Location','Northwest')
     xlabel('Length (m)'); ylabel('Height (m)')
 hold off
